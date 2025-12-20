@@ -18,8 +18,16 @@ const internetGateway = new oci.core.InternetGateway('synit-igw', {
   enabled: true,
 });
 
-const routeTable = new oci.core.DefaultRouteTable('route-table', {
-  manageDefaultResourceId: vcn.defaultRouteTableId,
+const natGateway = new oci.core.NatGateway('synit-nat', {
+  compartmentId,
+  vcnId: vcn.id,
+  displayName: "synit-nat-arm",
+});
+
+const routeTable = new oci.core.RouteTable('route-table', {
+  compartmentId,
+  vcnId: vcn.id,
+  displayName: "synit-route-table-arm",
   routeRules: [
     {
       networkEntityId: internetGateway.id,
@@ -28,13 +36,79 @@ const routeTable = new oci.core.DefaultRouteTable('route-table', {
   ]
 });
 
-const subnet = new oci.core.Subnet('synit-subnet', {
+const privateRouteTable = new oci.core.RouteTable('private-route-table', {
+  compartmentId,
+  vcnId: vcn.id,
+  displayName: "synit-private-route-table-arm",
+  routeRules: [
+    {
+      networkEntityId: natGateway.id,
+      destination: "0.0.0.0/0",
+    }
+  ]
+});
+
+const lbSecurityList = new oci.core.SecurityList('synit-lb-sls', {
+  compartmentId,
+  vcnId: vcn.id,
+  displayName: "synit-lb-sls-arm",
+  ingressSecurityRules: [
+    {
+      protocol: "6",
+      source: "0.0.0.0/0",
+      tcpOptions: { min: 80, max: 80 },
+    },
+    {
+      protocol: "6",
+      source: "0.0.0.0/0",
+      tcpOptions: { min: 443, max: 443 },
+    },
+  ]
+});
+
+const instanceSecurityList = new oci.core.SecurityList('synit-instance-sls', {
+  compartmentId,
+  vcnId: vcn.id,
+  displayName: "synit-instance-sls-arm",
+  ingressSecurityRules: [
+    {
+      protocol: "6",
+      source: "0.0.0.0/0",
+      tcpOptions: { min: 22, max: 22 },
+    },
+    {
+      protocol: "6",
+      source: "0.0.0.0/0",
+      tcpOptions: { min: 6443, max: 6443 },
+    },
+  ]
+});
+
+const publicSubnet = new oci.core.Subnet('synit-pub-subnet', {
   compartmentId,
   vcnId: vcn.id,
   cidrBlock: "10.0.1.0/24",
   displayName: "synit-subnet-arm",
   routeTableId: routeTable.id,
-  prohibitPublicIpOnVnic: false,
+  securityListIds: [lbSecurityList.id],
+});
+
+const privateSubnet = new oci.core.Subnet('synit-priv-subnet', {
+  compartmentId,
+  vcnId: vcn.id,
+  cidrBlock: "10.0.2.0/24",
+  displayName: "synit-subnet-arm",
+  routeTableId: privateRouteTable.id,
+  securityListIds: [instanceSecurityList.id],
+  prohibitPublicIpOnVnic: true,
+});
+
+const lb = new oci.loadbalancer.LoadBalancer('synit-lb', {
+  compartmentId,
+  shape: '10Mbps',
+  subnetIds: [publicSubnet.id],
+  displayName: "synit-lb-arm",
+  isPrivate: false,
 });
 
 new oci.artifacts.ContainerRepository('synit-repo', {
@@ -50,7 +124,7 @@ const ads = oci.identity.getAvailabilityDomains({
 const ubuntuImage = oci.core.getImages({
   compartmentId,
   operatingSystem: 'Canonical Ubuntu',
-  operatingSystemVersion: '20.04',
+  operatingSystemVersion: '24.04',
   shape,
   sortBy: 'TIMECREATED',
   sortOrder: 'DESC',
@@ -62,8 +136,8 @@ const vmInstance = new oci.core.Instance('synit-vm', {
   shape,
   ...(shape === 'VM.Standard.A1.Flex' && {
     shapeConfig: {
-      ocpus: 1,
-      memoryInGbs: 6,
+      ocpus: 4,
+      memoryInGbs: 24,
     }
   }),
   sourceDetails: {
@@ -76,8 +150,8 @@ const vmInstance = new oci.core.Instance('synit-vm', {
     }),
   },
   createVnicDetails: {
-    subnetId: subnet.id,
-    assignPublicIp: 'true',
+    subnetId: privateSubnet.id,
+    assignPublicIp: 'false',
   },
   metadata: {
     "ssh_authorized_keys": sshPublicKey,
