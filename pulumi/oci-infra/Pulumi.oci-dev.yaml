@@ -1,0 +1,6 @@
+config:
+  oci-infra:compartmentId: ocid1.tenancy.oc1..aaaaaaaatn5ku34tltthrqfw36hiug6xspae7tk54j3xlyebe4mht7cevvha
+  oci-infra:sshPublicKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAM6JYAZTAgt4J9P6OGqqjLMZkxHODYtPuqytwPhblhF mauriciobryan1998@gmail.com
+  oci-infra:availabilityDomain: vYyo:PHX-AD-3
+  oci-infra:shape: VM.Standard.A1.Flex
+  # oci-infra:shape: VM.Standard.E2.1.Micro
