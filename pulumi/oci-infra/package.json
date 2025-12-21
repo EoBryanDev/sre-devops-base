@@ -1,5 +1,5 @@
 {
-    "name": "oci-infra-base",
+    "name": "oci-infra",
     "main": "index.ts",
     "devDependencies": {
         "@types/node": "^18",

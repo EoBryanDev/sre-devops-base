@@ -1,4 +1,4 @@
-name: oci-infra-base
+name: oci-infra
 description: A minimal OCI TypeScript Pulumi program
 runtime:
   name: nodejs
