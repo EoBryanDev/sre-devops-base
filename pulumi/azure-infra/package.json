@@ -1,12 +1,12 @@
 {
-    "name": "oci-infra",
+    "name": "azure-infra",
     "main": "index.ts",
     "devDependencies": {
         "@types/node": "^18",
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "@pulumi/oci": "^0.13.0",
+        "@pulumi/azure-native": "^3.12.0",
         "@pulumi/pulumi": "^3.113.0"
     }
 }

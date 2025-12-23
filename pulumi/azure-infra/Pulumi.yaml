@@ -1,5 +1,5 @@
-name: gcp-infra
-description: GCP Free Tier Infrastructure
+name: azure-infra
+description: Basic cloud infra on Azure
 runtime:
   name: nodejs
   options:

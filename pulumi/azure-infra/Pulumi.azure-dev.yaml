@@ -1,0 +1,2 @@
+config:
+  azure-infra:sshPublicKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAM6JYAZTAgt4J9P6OGqqjLMZkxHODYtPuqytwPhblhF mauriciobryan1998@gmail.com
