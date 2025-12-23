@@ -1,12 +1,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
-// Configurações customizadas (namespace do projeto ou sem namespace)
+// hi
 const config = new pulumi.Config();
 const sshPublicKey = config.require("sshPublicKey");
 const sshUser = sshPublicKey.split(' ').pop()?.split('@')[0] || "ubuntu";
 
-// Configurações do provider GCP
 const gcpConfig = new pulumi.Config('gcp');
 const project = gcpConfig.require("project");
 const region = gcpConfig.get("region") || "us-central1"; // us-central1/us-west1/us-east1
