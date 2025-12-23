@@ -1,6 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as oci from '@pulumi/oci';
 
+// 
 const config = new pulumi.Config();
 const compartmentId = config.require('compartmentId');
 const sshPublicKey = config.require('sshPublicKey');
