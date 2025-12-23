@@ -25,7 +25,12 @@ const subnet = new azure.network.Subnet("synit-az-subnet", {
 const publicIp = new azure.network.PublicIPAddress("synit-az-pip", {
   resourceGroupName: resourceGroup.name,
   location: resourceGroup.location,
-  publicIPAllocationMethod: "Dynamic",
+  sku: {
+    name: "Standard",
+    tier: "Regional"
+  },
+  publicIPAllocationMethod: "Static",
+  publicIPAddressVersion: "IPv4"
 });
 
 const nsg = new azure.network.NetworkSecurityGroup("synit-az-nsg", {
@@ -56,7 +61,7 @@ const nic = new azure.network.NetworkInterface("synit-az-nic", {
     publicIPAddress: { id: publicIp.id },
   }],
   networkSecurityGroup: { id: nsg.id },
-});
+}, { deleteBeforeReplace: true });
 
 const vm = new azure.compute.VirtualMachine("synit-az-vm", {
   resourceGroupName: resourceGroup.name,
@@ -65,10 +70,13 @@ const vm = new azure.compute.VirtualMachine("synit-az-vm", {
     networkInterfaces: [{ id: nic.id }],
   },
   hardwareProfile: {
-    vmSize: "Standard_B1s",
+    vmSize: "Standard_B1ms",    // ← Tente esse primeiro (1 vCPU, 2GB RAM)
+    // vmSize: "Standard_B2s",   // 2 vCPUs, 4GB RAM
+    // vmSize: "Standard_DS1_v2", // 1 vCPU, 3.5GB RAM
+    // vmSize: "DC1s_v3",
   },
   osProfile: {
-    computerName: "myvm",
+    computerName: "synit-az-vm",
     adminUsername: "azureuser",
     linuxConfiguration: {
       disablePasswordAuthentication: true,
@@ -91,7 +99,7 @@ const vm = new azure.compute.VirtualMachine("synit-az-vm", {
       name: "osdisk",
       createOption: "FromImage",
       managedDisk: {
-        storageAccountType: "Standard_LRS", // HDD padrão (mais barato)
+        storageAccountType: "Standard_LRS",
       },
     },
   },
