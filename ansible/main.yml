@@ -1,0 +1,22 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Update repo cache Ubuntu
+      tags: always
+      ansible.builtin.apt:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Update repo cache CentOS
+      tags: always
+      ansible.builtin.dnf:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "CentOS"
+
+- hosts: workstations
+  become: true
+  roles:
+    - workstations

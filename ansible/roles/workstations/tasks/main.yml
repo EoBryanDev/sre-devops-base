@@ -1,0 +1,56 @@
+- name: Install packages
+  become: true
+  ansible.builtin.apt: 
+    name: 
+      - build-essential
+      - curl
+      - git
+      - unzip
+      - python3-pip
+      - software-properties-common
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Set pulumi version
+  set_fact:
+    pulumi_version: "3.213.0"
+
+- name: Verify if Pulumi is already installed
+  ansible.builtin.command: pulumi version
+  register: pulumi_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: Manual Pulumi installati on (Linux x64)
+  when: pulumi_check.rc != 0 or pulumi_version not in pulumi_check.stdout
+  block:
+    - name: Create temporary directory for download
+      ansible.builtin.file:
+        path: /tmp/pulumi_install
+        state: directory
+
+    - name: Download and extract Pulumi x64
+      ansible.builtin.unarchive:
+        src: "https://github.com/pulumi/pulumi/releases/download/v{{ pulumi_version }}/pulumi-v{{ pulumi_version }}-linux-x64.tar.gz"
+        dest: /tmp/pulumi_install
+        remote_src: yes
+
+    - name: Move binaries to /usr/local/bin
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/pulumi_install/pulumi/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        mode: '0755'
+        remote_src: yes
+      loop:
+        - pulumi
+        - pulumi-language-nodejs
+        - pulumi-language-python
+        - pulumi-language-go
+        - pulumi-analyzer-policy
+
+    - name: Clean temporary files
+      ansible.builtin.file:
+        path: /tmp/pulumi_install
+        state: absent
