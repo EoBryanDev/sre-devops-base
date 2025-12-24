@@ -1,5 +1,5 @@
-name: azure-infra
-description: Basic cloud infra on Azure
+name: aws-infra
+description: Aws basic cloud infra structure
 runtime:
   name: nodejs
   options:
