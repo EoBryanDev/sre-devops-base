@@ -1,0 +1,11 @@
+[debian_ubuntu]
+127.0.0.1
+
+[redhat_centos]
+
+[k3s_master]
+
+[k3s_worker]
+
+[workstation]
+127.0.0.1

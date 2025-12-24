@@ -1,0 +1,14 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install updates Ubuntu
+      ansible.builtin.apt:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install updates CentOS
+      ansible.builtin.dnf:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "CentOS"
